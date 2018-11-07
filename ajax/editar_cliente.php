@@ -1,0 +1,71 @@
+<?php
+	include('is_logged.php');//Archivo verifica que el usario que intenta acceder a la URL esta logueado
+	/*Inicia validacion del lado del servidor*/
+	if (empty($_POST['mod_id'])) {
+           $errors[] = "ID vacío";
+        }else if (empty($_POST['mod_nombre'])) {
+           $errors[] = "Nombre vacío";
+        }  else if ($_POST['mod_estado']==""){
+			$errors[] = "Selecciona el estado del cliente";
+		}  else if (
+			!empty($_POST['mod_id']) &&
+			!empty($_POST['mod_nombre']) &&
+			$_POST['mod_estado']!="" 
+		){
+		/* Connect To Database*/
+		require_once ("../config/db.php");//Contiene las variables de configuracion para conectar a la base de datos
+		require_once ("../config/conexion.php");//Contiene funcion que conecta a la base de datos
+		// escaping, additionally removing everything that could be (html/javascript-) code
+		$nombre=mysqli_real_escape_string($con,(strip_tags($_POST["mod_nombre"],ENT_QUOTES)));
+		$telefono=mysqli_real_escape_string($con,(strip_tags($_POST["mod_telefono"],ENT_QUOTES)));
+		$email=mysqli_real_escape_string($con,(strip_tags($_POST["mod_email"],ENT_QUOTES)));
+		$direccion=mysqli_real_escape_string($con,(strip_tags($_POST["mod_direccion"],ENT_QUOTES)));
+		$rif=mysqli_real_escape_string($con,(strip_tags($_POST["mod_rif"],ENT_QUOTES)));
+		$ent=mysqli_real_escape_string($con,(strip_tags($_POST["mod_cod"],ENT_QUOTES)));
+		$por=mysqli_real_escape_string($con,(strip_tags($_POST["mod_por"],ENT_QUOTES)));
+		$por = floatval($por)/100;
+		$region=mysqli_real_escape_string($con,(strip_tags($_POST["mod_reg"],ENT_QUOTES)));
+		$estado=intval($_POST['mod_estado']);
+		
+		$id_cliente=intval($_POST['mod_id']);
+		$sql="UPDATE vis_clientes SET c_nom_cli='".$nombre."', c_tel_cli='".$telefono."', c_email_cli='".$email."', c_dir_cli='".$direccion."', c_rif_cli='".$rif."', c_cod_ent='".$ent."', c_cod_reg='".$region."', c_por_dis='".$por."', c_est_cli='".$estado."' WHERE c_cod_cli='".$id_cliente."'";
+		$query_update = mysqli_query($con,$sql);
+			if ($query_update){
+				$messages[] = "Cliente ha sido actualizado satisfactoriamente.";
+			} else{
+				$errors []= "Lo siento algo ha salido mal intenta nuevamente.".mysqli_error($con);
+			}
+		} else {
+			$errors []= "Error desconocido.";
+		}
+		
+		if (isset($errors)){
+			
+			?>
+			<div class="alert alert-danger" role="alert">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+					<strong>Error!</strong> 
+					<?php
+						foreach ($errors as $error) {
+								echo $error;
+							}
+						?>
+			</div>
+			<?php
+			}
+			if (isset($messages)){
+				
+				?>
+				<div class="alert alert-success" role="alert">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						<strong>¡Bien hecho!</strong>
+						<?php
+							foreach ($messages as $message) {
+									echo $message;
+								}
+							?>
+				</div>
+				<?php
+			}
+
+?>
